@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CivicFix - Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      background: #f0f2f9;
+    }
+
+    /* Left Panel */
+    .left-panel {
+      flex: 1;
+      background: linear-gradient(135deg, #6c63ff, #a78bfa);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 60px 40px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    .left-panel::before {
+      content: '';
+      position: absolute;
+      width: 400px; height: 400px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 50%;
+      top: -100px; left: -100px;
+    }
+    .left-panel::after {
+      content: '';
+      position: absolute;
+      width: 300px; height: 300px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 50%;
+      bottom: -80px; right: -80px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 50px; z-index: 1; }
+    .brand-icon {
+      width: 48px; height: 48px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+    }
+    .brand-name { font-size: 1.8rem; font-weight: 800; }
+    .left-title { font-size: 2rem; font-weight: 800; text-align: center; margin-bottom: 16px; z-index: 1; line-height: 1.3; }
+    .left-sub { font-size: 0.9rem; opacity: 0.85; text-align: center; max-width: 320px; z-index: 1; line-height: 1.6; }
+
+    .features { margin-top: 50px; display: flex; flex-direction: column; gap: 16px; z-index: 1; width: 100%; max-width: 320px; }
+    .feature-row { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.1); border-radius: 12px; padding: 12px 16px; }
+    .feature-icon { font-size: 1.2rem; }
+    .feature-text { font-size: 0.82rem; font-weight: 500; }
+
+    /* Right Panel */
+    .right-panel {
+      width: 480px;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 50px;
+    }
+    .form-title { font-size: 1.6rem; font-weight: 800; color: #1a1d2e; margin-bottom: 6px; }
+    .form-sub { font-size: 0.83rem; color: #8b8fa8; margin-bottom: 36px; }
+
+    .input-group { margin-bottom: 18px; }
+    .input-group label { display: block; font-size: 0.78rem; font-weight: 600; color: #1a1d2e; margin-bottom: 7px; }
+    .input-wrap { position: relative; }
+    .input-wrap input {
+      width: 100%; padding: 12px 16px 12px 42px;
+      border: 1.5px solid #e8eaf2;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      color: #1a1d2e;
+      outline: none;
+      transition: border-color 0.2s;
+      background: #f8f9fc;
+    }
+    .input-wrap input:focus { border-color: #6c63ff; background: white; }
+    .input-wrap input::placeholder { color: #b0b3c1; }
+    .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 1rem; }
+    .input-eye { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 1rem; cursor: pointer; }
+
+    .form-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .remember { display: flex; align-items: center; gap: 7px; font-size: 0.78rem; color: #555; cursor: pointer; }
+    .remember input { accent-color: #6c63ff; }
+    .forgot { font-size: 0.78rem; color: #6c63ff; font-weight: 600; cursor: pointer; text-decoration: none; }
+    .forgot:hover { text-decoration: underline; }
+
+    .btn-login {
+      width: 100%; padding: 13px;
+      background: linear-gradient(135deg, #6c63ff, #a78bfa);
+      color: white; border: none; border-radius: 10px;
+      font-family: inherit; font-size: 0.88rem; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+      margin-bottom: 20px;
+    }
+    .btn-login:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(108,99,255,0.35); }
+    .btn-login:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .divider { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .divider-line { flex: 1; height: 1px; background: #e8eaf2; }
+    .divider-text { font-size: 0.75rem; color: #8b8fa8; font-weight: 500; }
+
+    .btn-google {
+      width: 100%; padding: 12px;
+      background: white; color: #1a1d2e;
+      border: 1.5px solid #e8eaf2; border-radius: 10px;
+      font-family: inherit; font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      margin-bottom: 28px;
+    }
+    .btn-google:hover { border-color: #6c63ff; background: #f8f9fc; }
+
+    .register-link { text-align: center; font-size: 0.82rem; color: #8b8fa8; }
+    .register-link a { color: #6c63ff; font-weight: 700; text-decoration: none; }
+    .register-link a:hover { text-decoration: underline; }
+
+    .error-msg {
+      background: #ffe4e6; color: #f43f5e;
+      border-radius: 8px; padding: 10px 14px;
+      font-size: 0.78rem; font-weight: 600;
+      margin-bottom: 16px; display: none;
+    }
+    .success-msg {
+      background: #dcfce7; color: #16a34a;
+      border-radius: 8px; padding: 10px 14px;
+      font-size: 0.78rem; font-weight: 600;
+      margin-bottom: 16px; display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Left Panel -->
+  <div class="left-panel">
+    <div class="brand">
+      <div class="brand-icon">🏙️</div>
+      <div class="brand-name">CivicFix</div>
+    </div>
+    <div class="left-title">Report. Track.<br>Resolve. Together.</div>
+    <div class="left-sub">Join thousands of citizens making their cities cleaner, safer, and smarter.</div>
+    <div class="features">
+      <div class="feature-row"><div class="feature-icon">📍</div><div class="feature-text">Real-time issue location tracking</div></div>
+      <div class="feature-row"><div class="feature-icon">🤖</div><div class="feature-text">AI-powered issue detection</div></div>
+      <div class="feature-row"><div class="feature-icon">🏆</div><div class="feature-text">Earn rewards for active reporting</div></div>
+      <div class="feature-row"><div class="feature-icon">🔔</div><div class="feature-text">Live status update notifications</div></div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="right-panel">
+    <div class="form-title">Welcome Back 👋</div>
+    <div class="form-sub">Sign in to your CivicFix account</div>
+
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="success-msg" id="successMsg"></div>
+
+    <div class="input-group">
+      <label>Email Address</label>
+      <div class="input-wrap">
+        <span class="input-icon">📧</span>
+        <input type="email" id="email" placeholder="you@example.com">
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>Password</label>
+      <div class="input-wrap">
+        <span class="input-icon">🔒</span>
+        <input type="password" id="password" placeholder="Enter your password">
+        <span class="input-eye" onclick="togglePassword()">👁️</span>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label class="remember"><input type="checkbox"> Remember me</label>
+      <a href="#" class="forgot">Forgot password?</a>
+    </div>
+
+    <button class="btn-login" id="loginBtn" onclick="handleLogin()">Sign In</button>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+      <div class="divider-text">or continue with</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <button class="btn-google" onclick="handleGoogleLogin()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
+      Continue with Google
+    </button>
+
+    <div class="register-link">Don't have an account? <a href="register.html">Sign up free</a></div>
+  </div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDlc5N_XLlW8i3GHql5h1v7w44GLlfk-NU",
+    authDomain: "civicfix-17bd0.firebaseapp.com",
+    projectId: "civicfix-17bd0",
+    storageBucket: "civicfix-17bd0.firebasestorage.app",
+    messagingSenderId: "1084802379613",
+    appId: "1:1084802379613:web:4664d99dba1bf4b07d82b4",
+    measurementId: "G-Q0VY8NVGJZ"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  function showError(msg) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = msg; el.style.display = 'block';
+    document.getElementById('successMsg').style.display = 'none';
+  }
+  function showSuccess(msg) {
+    const el = document.getElementById('successMsg');
+    el.textContent = msg; el.style.display = 'block';
+    document.getElementById('errorMsg').style.display = 'none';
+  }
+
+  window.handleLogin = async function() {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const btn = document.getElementById('loginBtn');
+
+    if (!email || !password) { showError('Please fill in all fields.'); return; }
+
+    btn.disabled = true; btn.textContent = 'Signing in...';
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      showSuccess('Login successful! Redirecting...');
+      setTimeout(() => window.location.href = 'index.html', 1200);
+    } catch (err) {
+      const msgs = {
+        'auth/user-not-found': 'No account found with this email.',
+        'auth/wrong-password': 'Incorrect password. Try again.',
+        'auth/invalid-email': 'Please enter a valid email address.',
+        'auth/too-many-requests': 'Too many attempts. Please try again later.'
+      };
+      showError(msgs[err.code] || 'Login failed. Please try again.');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Sign In';
+    }
+  }
+
+  window.handleGoogleLogin = async function() {
+    try {
+      await signInWithPopup(auth, provider);
+      showSuccess('Login successful! Redirecting...');
+      setTimeout(() => window.location.href = 'index.html', 1200);
+    } catch (err) {
+      showError('Google sign-in failed. Please try again.');
+    }
+  }
+
+  window.togglePassword = function() {
+    const input = document.getElementById('password');
+    input.type = input.type === 'password' ? 'text' : 'password';
+  }
+
+  // Enter key support
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') window.handleLogin();
+  });
+</script>
+</body>
+</html>
