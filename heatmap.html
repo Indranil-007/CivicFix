@@ -236,7 +236,7 @@
     <div class="sidebar-label">Main</div>
     <a href="index.html" class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
     <div class="nav-item active"><span class="nav-icon">🗺️</span> Heatmap View</div>
-    <a href="#" class="nav-item"><span class="nav-icon">📋</span> Complaints <span class="nav-badge">24</span></a>
+    <a href="report.html" class="nav-item"><span class="nav-icon">📋</span> Complaints</a>
     <a href="#" class="nav-item"><span class="nav-icon">👥</span> Citizens</a>
   </div>
   <div class="sidebar-section" style="margin-top:8px;">
@@ -265,7 +265,7 @@
       <div class="topbar-icon">🗺️</div>
       <div class="topbar-icon">🔔<div class="badge-dot"></div></div>
       <div class="topbar-icon">⚙️</div>
-      <div class="avatar">CF</div>
+      <div class="avatar" id="avatarInitial">CF</div>
     </div>
   </div>
 
@@ -521,6 +521,29 @@
 
   // Start with heatmap
   showHeatmap();
+</script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD1c5N_XlIW8i3GHql5h1v7w44GLlfk-NU",
+    authDomain: "civicfix-17bd0.firebaseapp.com",
+    projectId: "civicfix-17bd0",
+    storageBucket: "civicfix-17bd0.firebasestorage.app",
+    messagingSenderId: "1084802379613",
+    appId: "1:1084802379613:web:4664d99dba1bf4b07d82b4",
+    measurementId: "G-Q0VY8NVGJZ"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    const name = user.displayName || user.email;
+    document.getElementById('avatarInitial').textContent = name.substring(0, 2).toUpperCase();
+  });
 </script>
 </body>
 </html>
