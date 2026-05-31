@@ -265,7 +265,20 @@
       <div class="topbar-icon">🗺️</div>
       <div class="topbar-icon">🔔<div class="badge-dot"></div></div>
       <div class="topbar-icon">⚙️</div>
-      <div class="avatar" id="avatarInitial">CF</div>
+      <!-- Avatar with dropdown -->
+      <div style="position:relative;">
+        <div class="avatar" id="avatarInitial" onclick="toggleDropdown()" style="cursor:pointer;">CF</div>
+        <div id="profileDropdown" style="display:none;position:absolute;right:0;top:44px;background:white;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,0.12);border:1px solid #e8eaf2;width:200px;z-index:999;overflow:hidden;">
+          <div style="padding:16px;border-bottom:1px solid #e8eaf2;display:flex;align-items:center;gap:10px;">
+            <div class="avatar" id="dropdownAvatar" style="width:36px;height:36px;font-size:0.8rem;flex-shrink:0;">CF</div>
+            <div><div id="dropdownName" style="font-size:0.82rem;font-weight:700;">User</div><div id="dropdownEmail" style="font-size:0.68rem;color:#8b8fa8;">email</div></div>
+          </div>
+          <a href="profile.html" style="display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:0.8rem;font-weight:600;color:#1a1d2e;text-decoration:none;">👤 My Profile</a>
+          <a href="profile.html" style="display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:0.8rem;font-weight:600;color:#1a1d2e;text-decoration:none;">🏆 My Points & Badges</a>
+          <a href="profile.html" style="display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:0.8rem;font-weight:600;color:#1a1d2e;text-decoration:none;">⚙️ Settings</a>
+          <div onclick="logoutUser()" style="display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:0.8rem;font-weight:600;color:#ff6584;cursor:pointer;border-top:1px solid #e8eaf2;">🚪 Logout</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -543,6 +556,55 @@
     if (!user) { window.location.href = 'login.html'; return; }
     const name = user.displayName || user.email;
     document.getElementById('avatarInitial').textContent = name.substring(0, 2).toUpperCase();
+  });
+</script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  const auth2 = getAuth(initializeApp({
+  apiKey: "AIzaSyD1c5N_XlIW8i3GHql5h1v7w44GLlfk-NU",
+  authDomain: "civicfix-17bd0.firebaseapp.com",
+  projectId: "civicfix-17bd0",
+  storageBucket: "civicfix-17bd0.firebasestorage.app",
+  messagingSenderId: "1084802379613",
+  appId: "1:1084802379613:web:4664d99dba1bf4b07d82b4",
+  measurementId: "G-Q0VY8NVGJZ"
+}));
+
+  onAuthStateChanged(auth2, (user) => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    const name = user.displayName || user.email;
+    const initials = name.substring(0, 2).toUpperCase();
+    const savedPic = localStorage.getItem('profilePic_' + user.uid);
+
+    // Set avatar
+    if (savedPic) {
+      document.getElementById('avatarInitial').innerHTML = `<img src="${savedPic}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      document.getElementById('dropdownAvatar').innerHTML = `<img src="${savedPic}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    } else {
+      document.getElementById('avatarInitial').textContent = initials;
+      document.getElementById('dropdownAvatar').textContent = initials;
+    }
+    document.getElementById('dropdownName').textContent = name;
+    document.getElementById('dropdownEmail').textContent = user.email;
+  });
+
+  window.toggleDropdown = function() {
+    const d = document.getElementById('profileDropdown');
+    d.style.display = d.style.display === 'none' ? 'block' : 'none';
+  }
+  window.logoutUser = function() {
+    if (confirm('Are you sure you want to logout?')) {
+      signOut(auth2).then(() => window.location.href = 'login.html');
+    }
+  }
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#avatarInitial') && !e.target.closest('#profileDropdown')) {
+      const d = document.getElementById('profileDropdown');
+      if (d) d.style.display = 'none';
+    }
   });
 </script>
 </body>

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CivicFix - My Profile</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f0f2f9; --card: #ffffff; --text: #1a1d2e; --muted: #8b8fa8;
+      --border: #e8eaf2; --accent: #6c63ff; --accent2: #ff6584;
+      --accent3: #43c6ac; --accent4: #f7971e;
+      --sidebar-w: 240px; --shadow: 0 2px 20px rgba(108,99,255,0.08); --radius: 16px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+
+    /* SIDEBAR */
+    .sidebar { width: var(--sidebar-w); background: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px 0; flex-shrink: 0; overflow-y: auto; }
+    .logo { display: flex; align-items: center; gap: 10px; padding: 0 20px 28px; }
+    .logo-icon { width: 34px; height: 34px; background: linear-gradient(135deg, var(--accent), #a78bfa); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; }
+    .logo-text { font-size: 1.1rem; font-weight: 800; }
+    .sidebar-section { padding: 0 12px; margin-bottom: 6px; }
+    .sidebar-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; padding: 10px 10px 6px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; color: var(--muted); font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.18s; position: relative; text-decoration: none; }
+    .nav-item:hover { background: #f4f3ff; color: var(--accent); }
+    .nav-item.active { background: linear-gradient(135deg, #6c63ff15, #a78bfa15); color: var(--accent); font-weight: 600; }
+    .nav-item.active::before { content: ''; position: absolute; left: 0; top: 20%; bottom: 20%; width: 3px; background: var(--accent); border-radius: 2px; }
+    .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+    .nav-badge { margin-left: auto; background: var(--accent2); color: white; font-size: 0.6rem; font-weight: 700; padding: 2px 6px; border-radius: 20px; }
+    .nav-arrow { margin-left: auto; font-size: 0.7rem; }
+
+    /* MAIN */
+    .main-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { height: 64px; background: white; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 28px; gap: 16px; flex-shrink: 0; }
+    .page-title { font-size: 1rem; font-weight: 700; flex: 1; }
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+    .topbar-icon { width: 34px; height: 34px; background: var(--bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; position: relative; }
+    .badge-dot { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: var(--accent2); border-radius: 50%; border: 2px solid white; }
+    .avatar { width: 34px; height: 34px; background: linear-gradient(135deg, var(--accent), #a78bfa); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.8rem; cursor: pointer; overflow: hidden; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
+    /* CONTENT */
+    .content { flex: 1; overflow-y: auto; padding: 24px 28px; }
+
+    /* PROFILE HERO */
+    .profile-hero {
+      background: linear-gradient(135deg, #6c63ff, #a78bfa);
+      border-radius: var(--radius); padding: 32px; margin-bottom: 24px;
+      display: flex; align-items: center; gap: 28px; position: relative; overflow: hidden;
+    }
+    .profile-hero::before { content: ''; position: absolute; width: 300px; height: 300px; background: rgba(255,255,255,0.06); border-radius: 50%; top: -100px; right: -80px; }
+    .profile-hero::after { content: ''; position: absolute; width: 200px; height: 200px; background: rgba(255,255,255,0.04); border-radius: 50%; bottom: -60px; left: 200px; }
+
+    .avatar-wrap { position: relative; flex-shrink: 0; z-index: 1; }
+    .avatar-large {
+      width: 90px; height: 90px; border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; font-weight: 800; color: white;
+      border: 3px solid rgba(255,255,255,0.4);
+      overflow: hidden; cursor: pointer;
+    }
+    .avatar-large img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .avatar-upload-btn {
+      position: absolute; bottom: 0; right: 0;
+      width: 28px; height: 28px; background: white;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      border: 2px solid var(--accent);
+    }
+    .avatar-upload-input { display: none; }
+
+    .hero-info { flex: 1; z-index: 1; }
+    .hero-name { font-size: 1.6rem; font-weight: 800; color: white; margin-bottom: 4px; }
+    .hero-email { font-size: 0.82rem; color: rgba(255,255,255,0.8); margin-bottom: 12px; }
+    .hero-role { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.2); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+
+    .hero-stats { display: flex; gap: 20px; z-index: 1; }
+    .hero-stat { text-align: center; }
+    .hero-stat-val { font-size: 1.6rem; font-weight: 800; color: white; }
+    .hero-stat-label { font-size: 0.68rem; color: rgba(255,255,255,0.75); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* GRID */
+    .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .card { background: white; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); padding: 24px; animation: fadeUp 0.4s ease both; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    .card-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+    .card-full { grid-column: span 2; }
+
+    /* INPUTS */
+    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--text); margin-bottom: 7px; }
+    .input-wrap { position: relative; }
+    .input-wrap input, .input-wrap select {
+      width: 100%; padding: 11px 16px 11px 42px;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      font-family: inherit; font-size: 0.85rem; color: var(--text);
+      outline: none; transition: border-color 0.2s; background: #f8f9fc;
+    }
+    .input-wrap select { appearance: none; cursor: pointer; }
+    .input-wrap input:focus, .input-wrap select:focus { border-color: var(--accent); background: white; }
+    .input-wrap input::placeholder { color: #b0b3c1; }
+    .input-wrap input:read-only { background: #f0f2f9; color: var(--muted); cursor: not-allowed; }
+    .input-icon { position: absolute; left: 14px; top: 12px; font-size: 1rem; pointer-events: none; }
+
+    /* SAVE BTN */
+    .btn-save { padding: 11px 28px; background: linear-gradient(135deg, var(--accent), #a78bfa); color: white; border: none; border-radius: 10px; font-family: inherit; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+    .btn-save:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(108,99,255,0.3); }
+    .btn-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    /* BADGES */
+    .badges-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .badge-item { text-align: center; padding: 16px 8px; border-radius: 12px; border: 2px solid var(--border); background: #f8f9fc; }
+    .badge-item.earned { border-color: var(--accent); background: linear-gradient(135deg, #6c63ff10, #a78bfa10); }
+    .badge-icon { font-size: 1.8rem; margin-bottom: 6px; }
+    .badge-name { font-size: 0.7rem; font-weight: 700; color: var(--text); }
+    .badge-desc { font-size: 0.62rem; color: var(--muted); margin-top: 2px; }
+    .badge-item.locked { opacity: 0.45; filter: grayscale(1); }
+
+    /* ACTIVITY */
+    .activity-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .activity-row:last-child { border-bottom: none; }
+    .activity-icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0; }
+    .activity-info { flex: 1; }
+    .activity-title { font-size: 0.78rem; font-weight: 600; }
+    .activity-time { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+    .activity-pts { font-size: 0.75rem; font-weight: 700; color: var(--accent3); }
+
+    /* DANGER */
+    .btn-danger { padding: 10px 20px; background: white; color: var(--accent2); border: 1.5px solid var(--accent2); border-radius: 10px; font-family: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.18s; }
+    .btn-danger:hover { background: #ffe4e6; }
+
+    /* SUCCESS / ERROR */
+    .msg { border-radius: 8px; padding: 10px 14px; font-size: 0.78rem; font-weight: 600; margin-bottom: 14px; display: none; }
+    .msg.success { background: #dcfce7; color: #16a34a; }
+    .msg.error { background: #ffe4e6; color: #f43f5e; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: #1a1d2e; color: white; padding: 14px 28px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 8px 30px rgba(0,0,0,0.2); transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); z-index: 9999; }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">🏙️</div>
+    <div class="logo-text">CivicFix</div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Main</div>
+    <a href="index.html" class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="heatmap.html" class="nav-item"><span class="nav-icon">🗺️</span> Heatmap View</a>
+    <a href="report.html" class="nav-item"><span class="nav-icon">📋</span> Complaints</a>
+    <a href="#" class="nav-item"><span class="nav-icon">👥</span> Citizens</a>
+  </div>
+  <div class="sidebar-section" style="margin-top:8px;">
+    <div class="sidebar-label">Management</div>
+    <div class="nav-item"><span class="nav-icon">🤖</span> AI Detection <span class="nav-arrow">›</span></div>
+    <div class="nav-item"><span class="nav-icon">🔔</span> Notifications <span class="nav-arrow">›</span></div>
+  </div>
+  <div class="sidebar-section" style="margin-top:8px;">
+    <div class="sidebar-label">Account</div>
+    <div class="nav-item active"><span class="nav-icon">👤</span> My Profile</div>
+    <div class="nav-item"><span class="nav-icon">⚙️</span> Settings</div>
+    <a href="login.html" class="nav-item"><span class="nav-icon">🔐</span> Logout</a>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-wrap">
+  <div class="topbar">
+    <div class="page-title">My Profile</div>
+    <div class="topbar-actions">
+      <div class="topbar-icon">🔔<div class="badge-dot"></div></div>
+      <div class="topbar-icon">⚙️</div>
+      <div class="avatar" id="avatarInitial" onclick="window.location.href='profile.html'" style="cursor:pointer;">CF</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- HERO -->
+    <div class="profile-hero">
+      <div class="avatar-wrap">
+        <div class="avatar-large" id="avatarLarge">?</div>
+        <div class="avatar-upload-btn" onclick="document.getElementById('picInput').click()">📷</div>
+        <input type="file" id="picInput" class="avatar-upload-input" accept="image/*" onchange="handleProfilePic(this)">
+      </div>
+      <div class="hero-info">
+        <div class="hero-name" id="heroName">Loading...</div>
+        <div class="hero-email" id="heroEmail"></div>
+        <div class="hero-role" id="heroRole">👥 Citizen</div>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-val" id="heroReports">0</div>
+          <div class="hero-stat-label">Reports</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val" id="heroPoints">0</div>
+          <div class="hero-stat-label">Points</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val" id="heroBadges">0</div>
+          <div class="hero-stat-label">Badges</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-grid">
+
+      <!-- EDIT PROFILE -->
+      <div class="card card-full">
+        <div class="card-title">✏️ Edit Profile</div>
+        <div class="msg success" id="successMsg">Profile updated successfully!</div>
+        <div class="msg error" id="errorMsg"></div>
+        <div class="input-row">
+          <div class="input-group">
+            <label>First Name</label>
+            <div class="input-wrap"><span class="input-icon">👤</span><input type="text" id="firstName" placeholder="First name"></div>
+          </div>
+          <div class="input-group">
+            <label>Last Name</label>
+            <div class="input-wrap"><span class="input-icon">👤</span><input type="text" id="lastName" placeholder="Last name"></div>
+          </div>
+        </div>
+        <div class="input-row">
+          <div class="input-group">
+            <label>Email Address</label>
+            <div class="input-wrap"><span class="input-icon">📧</span><input type="email" id="emailField" placeholder="Email" readonly></div>
+          </div>
+          <div class="input-group">
+            <label>Phone Number</label>
+            <div class="input-wrap"><span class="input-icon">📱</span><input type="tel" id="phone" placeholder="+91 00000 00000"></div>
+          </div>
+        </div>
+        <div class="input-row">
+          <div class="input-group">
+            <label>City / Area</label>
+            <div class="input-wrap"><span class="input-icon">🏙️</span><input type="text" id="city" placeholder="e.g. Kolkata"></div>
+          </div>
+          <div class="input-group">
+            <label>Role</label>
+            <div class="input-wrap">
+              <span class="input-icon">🎭</span>
+              <select id="role">
+                <option value="citizen">👥 Citizen</option>
+                <option value="authority">🏛️ Authority / Official</option>
+                <option value="volunteer">🙋 Volunteer</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Bio / About</label>
+          <div class="input-wrap" style="position:relative;">
+            <span class="input-icon">📝</span>
+            <input type="text" id="bio" placeholder="Tell us about yourself..." style="padding-left:42px;">
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:4px;">
+          <button class="btn-danger" onclick="confirmLogout()">🚪 Logout</button>
+          <button class="btn-save" id="saveBtn" onclick="saveProfile()">💾 Save Changes</button>
+        </div>
+      </div>
+
+      <!-- BADGES -->
+      <div class="card card-full">
+        <div class="card-title">🏆 Badges & Achievements</div>
+        <div class="badges-grid" id="badgesGrid">
+          <div class="badge-item earned">
+            <div class="badge-icon">🌟</div>
+            <div class="badge-name">First Report</div>
+            <div class="badge-desc">Submitted first issue</div>
+          </div>
+          <div class="badge-item locked">
+            <div class="badge-icon">🔥</div>
+            <div class="badge-name">On Fire</div>
+            <div class="badge-desc">5 reports in a week</div>
+          </div>
+          <div class="badge-item locked">
+            <div class="badge-icon">💎</div>
+            <div class="badge-name">Diamond</div>
+            <div class="badge-desc">50 reports filed</div>
+          </div>
+          <div class="badge-item locked">
+            <div class="badge-icon">🏙️</div>
+            <div class="badge-name">City Hero</div>
+            <div class="badge-desc">100 reports filed</div>
+          </div>
+          <div class="badge-item locked">
+            <div class="badge-icon">👍</div>
+            <div class="badge-name">Popular</div>
+            <div class="badge-desc">Get 50 upvotes</div>
+          </div>
+          <div class="badge-item locked">
+            <div class="badge-icon">⚡</div>
+            <div class="badge-name">Quick Fixer</div>
+            <div class="badge-desc">Issue resolved in 24h</div>
+          </div>
+          <div class="badge-item locked">
+            <div class="badge-icon">🗺️</div>
+            <div class="badge-name">Explorer</div>
+            <div class="badge-desc">Report in 5 areas</div>
+          </div>
+          <div class="badge-item locked">
+            <div class="badge-icon">👑</div>
+            <div class="badge-name">Legend</div>
+            <div class="badge-desc">500 points earned</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECENT ACTIVITY -->
+      <div class="card card-full">
+        <div class="card-title">🕐 Recent Activity</div>
+        <div id="activityList">
+          <div style="text-align:center;padding:30px;color:var(--muted);font-size:0.82rem;">Loading activity...</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, updateDoc, collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD1c5N_XlIW8i3GHql5h1v7w44GLlfk-NU",
+    authDomain: "civicfix-17bd0.firebaseapp.com",
+    projectId: "civicfix-17bd0",
+    storageBucket: "civicfix-17bd0.firebasestorage.app",
+    messagingSenderId: "1084802379613",
+    appId: "1:1084802379613:web:4664d99dba1bf4b07d82b4",
+    measurementId: "G-Q0VY8NVGJZ"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  let currentUser = null;
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    currentUser = user;
+    await loadProfile(user);
+    await loadActivity(user);
+  });
+
+  async function loadProfile(user) {
+    try {
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      const data = userDoc.exists() ? userDoc.data() : {};
+
+      // Hero section
+      const fullName = `${data.firstName || ''} ${data.lastName || ''}`.trim() || user.displayName || 'User';
+      document.getElementById('heroName').textContent = fullName;
+      document.getElementById('heroEmail').textContent = user.email;
+      document.getElementById('heroReports').textContent = data.totalReports || 0;
+      document.getElementById('heroPoints').textContent = data.rewardPoints || 0;
+
+      // Role display
+      const roleMap = { citizen: '👥 Citizen', authority: '🏛️ Authority', volunteer: '🙋 Volunteer' };
+      document.getElementById('heroRole').textContent = roleMap[data.role] || '👥 Citizen';
+
+      // Avatar
+      const savedPic = localStorage.getItem('profilePic_' + user.uid);
+      if (savedPic) {
+        setAvatarImage(savedPic);
+      } else {
+        const initials = fullName.substring(0, 2).toUpperCase();
+        document.getElementById('avatarLarge').textContent = initials;
+        document.getElementById('avatarInitial').textContent = initials;
+      }
+
+      // Badges count
+      const earned = data.totalReports > 0 ? 1 : 0;
+      document.getElementById('heroBadges').textContent = earned;
+      if (data.totalReports > 0) {
+        document.querySelector('.badge-item:first-child').classList.add('earned');
+        document.querySelector('.badge-item:first-child').classList.remove('locked');
+      }
+
+      // Fill form
+      document.getElementById('firstName').value = data.firstName || '';
+      document.getElementById('lastName').value = data.lastName || '';
+      document.getElementById('emailField').value = user.email;
+      document.getElementById('phone').value = data.phone || '';
+      document.getElementById('city').value = data.city || '';
+      document.getElementById('bio').value = data.bio || '';
+      document.getElementById('role').value = data.role || 'citizen';
+    } catch(e) { console.error(e); }
+  }
+
+  function setAvatarImage(src) {
+    const large = document.getElementById('avatarLarge');
+    const small = document.getElementById('avatarInitial');
+    large.innerHTML = `<img src="${src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    small.innerHTML = `<img src="${src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+  }
+
+  async function loadActivity(user) {
+    try {
+      const q = query(collection(db, 'complaints'), where('userId', '==', user.uid), orderBy('createdAt', 'desc'));
+      const snap = await getDocs(q);
+      const list = document.getElementById('activityList');
+      if (snap.empty) {
+        list.innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);font-size:0.82rem;">No activity yet. Start reporting issues!</div>`;
+        return;
+      }
+      const catEmoji = { Pothole:'🕳️', Garbage:'🗑️', 'Street Light':'💡', 'Water Leakage':'💧', Traffic:'🚦', Other:'📌' };
+      const statusColor = { Reported:'#ff6584', 'In Progress':'#f7971e', Resolved:'#43c6ac' };
+      list.innerHTML = snap.docs.slice(0, 8).map(d => {
+        const c = d.data();
+        const emoji = catEmoji[c.category] || '📌';
+        const color = statusColor[c.status] || '#8b8fa8';
+        const time = getTimeAgo(c.createdAt);
+        return `
+          <div class="activity-row">
+            <div class="activity-icon" style="background:${color}22;">${emoji}</div>
+            <div class="activity-info">
+              <div class="activity-title">${c.title || 'Issue Reported'}</div>
+              <div class="activity-time">📍 ${c.landmark || 'Unknown'} • ${time}</div>
+            </div>
+            <div class="activity-pts">+10 pts</div>
+          </div>`;
+      }).join('');
+    } catch(e) {
+      document.getElementById('activityList').innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);font-size:0.82rem;">Could not load activity.</div>`;
+    }
+  }
+
+  window.handleProfilePic = function(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const src = e.target.result;
+      localStorage.setItem('profilePic_' + currentUser.uid, src);
+      setAvatarImage(src);
+      showToast('✅ Profile picture updated!');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  window.saveProfile = async function() {
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const city = document.getElementById('city').value.trim();
+    const bio = document.getElementById('bio').value.trim();
+    const role = document.getElementById('role').value;
+    const btn = document.getElementById('saveBtn');
+
+    if (!firstName) { showMsg('error', 'First name is required.'); return; }
+
+    btn.disabled = true; btn.textContent = '⏳ Saving...';
+    try {
+      await updateDoc(doc(db, 'users', currentUser.uid), { firstName, lastName, phone, city, bio, role });
+      await updateProfile(currentUser, { displayName: `${firstName} ${lastName}` });
+
+      // Update hero
+      document.getElementById('heroName').textContent = `${firstName} ${lastName}`.trim();
+      const initials = `${firstName}${lastName}`.substring(0,2).toUpperCase();
+      const savedPic = localStorage.getItem('profilePic_' + currentUser.uid);
+      if (!savedPic) {
+        document.getElementById('avatarLarge').textContent = initials;
+        document.getElementById('avatarInitial').textContent = initials;
+      }
+      const roleMap = { citizen: '👥 Citizen', authority: '🏛️ Authority', volunteer: '🙋 Volunteer' };
+      document.getElementById('heroRole').textContent = roleMap[role] || '👥 Citizen';
+
+      showMsg('success', '✅ Profile updated successfully!');
+      showToast('✅ Profile saved!');
+    } catch(e) {
+      showMsg('error', 'Failed to save. Please try again.');
+    } finally {
+      btn.disabled = false; btn.textContent = '💾 Save Changes';
+    }
+  }
+
+  window.confirmLogout = function() {
+    if (confirm('Are you sure you want to logout?')) {
+      signOut(auth).then(() => window.location.href = 'login.html');
+    }
+  }
+
+  function showMsg(type, msg) {
+    document.getElementById('successMsg').style.display = 'none';
+    document.getElementById('errorMsg').style.display = 'none';
+    const el = document.getElementById(type === 'success' ? 'successMsg' : 'errorMsg');
+    el.textContent = msg; el.style.display = 'block';
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg; toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  function getTimeAgo(iso) {
+    if (!iso) return 'Unknown';
+    const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.floor(hrs/24)}d ago`;
+  }
+</script>
+</body>
+</html>
