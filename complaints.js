@@ -46,7 +46,7 @@ router.post("/", verifyToken, upload.array("images", 4), async (req, res) => {
     };
 
     const docRef = await db.collection("complaints").add(complaintData);
-
+console.log("New complaint received:", complaintData);
     // Increment the user's complaint count
     const userRef = db.collection("users").doc(req.user.uid);
     const userDoc = await userRef.get();
