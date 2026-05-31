@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CivicFix - Citizens Leaderboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f0f2f9; --card: #ffffff; --text: #1a1d2e; --muted: #8b8fa8;
+      --border: #e8eaf2; --accent: #6c63ff; --accent2: #ff6584;
+      --accent3: #43c6ac; --accent4: #f7971e;
+      --sidebar-w: 240px; --shadow: 0 2px 20px rgba(108,99,255,0.08); --radius: 16px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+
+    /* SIDEBAR */
+    .sidebar { width: var(--sidebar-w); background: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px 0; flex-shrink: 0; overflow-y: auto; }
+    .logo { display: flex; align-items: center; gap: 10px; padding: 0 20px 28px; }
+    .logo-icon { width: 34px; height: 34px; background: linear-gradient(135deg, var(--accent), #a78bfa); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; }
+    .logo-text { font-size: 1.1rem; font-weight: 800; }
+    .sidebar-section { padding: 0 12px; margin-bottom: 6px; }
+    .sidebar-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; padding: 10px 10px 6px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; color: var(--muted); font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.18s; position: relative; text-decoration: none; }
+    .nav-item:hover { background: #f4f3ff; color: var(--accent); }
+    .nav-item.active { background: linear-gradient(135deg, #6c63ff15, #a78bfa15); color: var(--accent); font-weight: 600; }
+    .nav-item.active::before { content: ''; position: absolute; left: 0; top: 20%; bottom: 20%; width: 3px; background: var(--accent); border-radius: 2px; }
+    .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+    .nav-badge { margin-left: auto; background: var(--accent2); color: white; font-size: 0.6rem; font-weight: 700; padding: 2px 6px; border-radius: 20px; }
+    .nav-arrow { margin-left: auto; font-size: 0.7rem; }
+
+    /* MAIN */
+    .main-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { height: 64px; background: white; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 28px; gap: 16px; flex-shrink: 0; }
+    .page-title { font-size: 1rem; font-weight: 700; flex: 1; }
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+    .topbar-icon { width: 34px; height: 34px; background: var(--bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; position: relative; }
+    .badge-dot { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: var(--accent2); border-radius: 50%; border: 2px solid white; }
+    .avatar { width: 34px; height: 34px; background: linear-gradient(135deg, var(--accent), #a78bfa); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.8rem; cursor: pointer; overflow: hidden; position: relative; }
+
+    /* CONTENT */
+    .content { flex: 1; overflow-y: auto; padding: 24px 28px; display: flex; flex-direction: column; gap: 20px; }
+
+    /* PAGE HEADER */
+    .page-header { display: flex; justify-content: space-between; align-items: center; }
+    .page-header h1 { font-size: 1.5rem; font-weight: 800; }
+    .page-header p { color: var(--muted); font-size: 0.8rem; margin-top: 2px; }
+
+    /* CARDS */
+    .card { background: white; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); padding: 24px; animation: fadeUp 0.4s ease both; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    .card-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+
+    /* STATS ROW */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .stat-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); padding: 16px 20px; display: flex; align-items: center; gap: 14px; animation: fadeUp 0.4s ease both; }
+    .stat-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+    .stat-val { font-size: 1.5rem; font-weight: 800; }
+    .stat-label { font-size: 0.7rem; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+
+    /* TOP 3 PODIUM */
+    .podium { display: flex; align-items: flex-end; justify-content: center; gap: 16px; padding: 20px 0 30px; }
+    .podium-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .podium-avatar {
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-weight: 800; color: white; font-size: 1rem; position: relative; overflow: hidden;
+      border: 3px solid white; box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+    .podium-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .podium-rank { font-size: 1.4rem; }
+    .podium-name { font-size: 0.8rem; font-weight: 700; text-align: center; max-width: 90px; }
+    .podium-pts { font-size: 0.72rem; font-weight: 600; color: var(--muted); }
+    .podium-bar { border-radius: 10px 10px 0 0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800; color: white; width: 80px; }
+
+    /* 1st place */
+    .podium-item.first .podium-avatar { width: 70px; height: 70px; font-size: 1.3rem; }
+    .podium-item.first .podium-bar { height: 90px; background: linear-gradient(135deg, #f7971e, #ffd200); }
+    /* 2nd place */
+    .podium-item.second .podium-avatar { width: 58px; height: 58px; }
+    .podium-item.second .podium-bar { height: 65px; background: linear-gradient(135deg, #8b8fa8, #b0b3c1); }
+    /* 3rd place */
+    .podium-item.third .podium-avatar { width: 52px; height: 52px; }
+    .podium-item.third .podium-bar { height: 45px; background: linear-gradient(135deg, #cd7f32, #e8a87c); }
+
+    /* MAIN LAYOUT */
+    .main-layout { display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
+
+    /* LEADERBOARD TABLE */
+    .leaderboard-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 16px; border-radius: 12px;
+      transition: all 0.18s; margin-bottom: 6px;
+      border: 1.5px solid transparent;
+    }
+    .leaderboard-row:hover { background: #f8f9ff; border-color: var(--border); }
+    .leaderboard-row.me { background: linear-gradient(135deg, #6c63ff10, #a78bfa10); border-color: #6c63ff30; }
+    .rank-num { font-size: 0.9rem; font-weight: 800; width: 28px; text-align: center; flex-shrink: 0; color: var(--muted); }
+    .rank-num.top1 { color: #f7971e; }
+    .rank-num.top2 { color: #8b8fa8; }
+    .rank-num.top3 { color: #cd7f32; }
+    .citizen-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 700; color: white; flex-shrink: 0; overflow: hidden; }
+    .citizen-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .citizen-info { flex: 1; }
+    .citizen-name { font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+    .citizen-meta { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+    .citizen-stats { display: flex; align-items: center; gap: 12px; }
+    .citizen-reports { font-size: 0.78rem; font-weight: 600; color: var(--muted); }
+    .citizen-points { font-size: 0.88rem; font-weight: 800; color: var(--accent); }
+    .me-tag { font-size: 0.58rem; font-weight: 700; background: var(--accent); color: white; padding: 2px 6px; border-radius: 10px; }
+
+    /* PROGRESS BAR */
+    .progress-wrap { margin-top: 4px; }
+    .progress-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--accent), #a78bfa); transition: width 1s ease; }
+
+    /* RIGHT PANEL */
+    .your-rank-card { padding: 20px; text-align: center; background: linear-gradient(135deg, #6c63ff, #a78bfa); border-radius: var(--radius); color: white; margin-bottom: 16px; box-shadow: var(--shadow); animation: fadeUp 0.4s ease both; }
+    .your-rank-num { font-size: 3rem; font-weight: 800; }
+    .your-rank-label { font-size: 0.8rem; opacity: 0.85; margin-top: 4px; }
+    .your-rank-pts { font-size: 1rem; font-weight: 700; margin-top: 8px; opacity: 0.9; }
+
+    .badge-mini-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .badge-mini { text-align: center; padding: 10px 6px; border-radius: 10px; border: 1.5px solid var(--border); background: #f8f9fc; }
+    .badge-mini.earned { border-color: var(--accent); background: #f4f3ff; }
+    .badge-mini.locked { opacity: 0.4; filter: grayscale(1); }
+    .badge-mini-icon { font-size: 1.2rem; }
+    .badge-mini-name { font-size: 0.6rem; font-weight: 700; margin-top: 3px; color: var(--text); }
+
+    /* FILTER */
+    .filter-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .filter-btn { padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--bg); font-family: inherit; font-size: 0.75rem; font-weight: 600; cursor: pointer; color: var(--muted); transition: all 0.18s; }
+    .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+    /* LOADING */
+    .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 40px auto; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* DROPDOWN */
+    .dropdown-wrap { position: relative; }
+    .profile-dropdown { display: none; position: absolute; right: 0; top: 44px; background: white; border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); border: 1px solid var(--border); width: 200px; z-index: 999; overflow: hidden; }
+    .dropdown-header { padding: 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+    .dropdown-avatar { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), #a78bfa); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.8rem; flex-shrink: 0; overflow: hidden; }
+    .dropdown-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .dropdown-link { display: flex; align-items: center; gap: 10px; padding: 11px 16px; font-size: 0.8rem; font-weight: 600; color: var(--text); text-decoration: none; transition: background 0.15s; }
+    .dropdown-link:hover { background: #f8f9ff; }
+    .dropdown-logout { display: flex; align-items: center; gap: 10px; padding: 11px 16px; font-size: 0.8rem; font-weight: 600; color: var(--accent2); cursor: pointer; border-top: 1px solid var(--border); transition: background 0.15s; }
+    .dropdown-logout:hover { background: #fff0f0; }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">🏙️</div>
+    <div class="logo-text">CivicFix</div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Main</div>
+    <a href="index.html" class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="heatmap.html" class="nav-item"><span class="nav-icon">🗺️</span> Heatmap View</a>
+    <a href="report.html" class="nav-item"><span class="nav-icon">📋</span> Complaints</a>
+    <div class="nav-item active"><span class="nav-icon">👥</span> Citizens</div>
+  </div>
+  <div class="sidebar-section" style="margin-top:8px;">
+    <div class="sidebar-label">Management</div>
+    <div class="nav-item"><span class="nav-icon">🤖</span> AI Detection <span class="nav-arrow">›</span></div>
+    <div class="nav-item"><span class="nav-icon">🔔</span> Notifications <span class="nav-arrow">›</span></div>
+  </div>
+  <div class="sidebar-section" style="margin-top:8px;">
+    <div class="sidebar-label">Account</div>
+    <a href="profile.html" class="nav-item"><span class="nav-icon">👤</span> My Profile</a>
+    <div class="nav-item"><span class="nav-icon">⚙️</span> Settings</div>
+    <a href="login.html" class="nav-item"><span class="nav-icon">🔐</span> Logout</a>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-wrap">
+  <div class="topbar">
+    <div class="page-title">Citizens Leaderboard</div>
+    <div class="topbar-actions">
+      <div class="topbar-icon">🔔<div class="badge-dot"></div></div>
+      <div class="topbar-icon">⚙️</div>
+      <div class="dropdown-wrap">
+        <div class="avatar" id="avatarInitial" onclick="toggleDropdown()" style="cursor:pointer;">CF</div>
+        <div class="profile-dropdown" id="profileDropdown">
+          <div class="dropdown-header">
+            <div class="dropdown-avatar" id="dropdownAvatar">CF</div>
+            <div><div id="dropdownName" style="font-size:0.82rem;font-weight:700;">User</div><div id="dropdownEmail" style="font-size:0.68rem;color:#8b8fa8;"></div></div>
+          </div>
+          <a href="profile.html" class="dropdown-link">👤 My Profile</a>
+          <a href="profile.html" class="dropdown-link">🏆 Points & Badges</a>
+          <a href="report.html" class="dropdown-link">➕ Report Issue</a>
+          <div class="dropdown-logout" onclick="logoutUser()">🚪 Logout</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Header -->
+    <div class="page-header">
+      <div>
+        <h1>Citizens Leaderboard 🏆</h1>
+        <p>Most active civic reporters in your city</p>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-icon" style="background:#ede9fe;">👥</div><div><div class="stat-val" id="totalCitizens">0</div><div class="stat-label">Total Citizens</div></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#dcfce7;">📋</div><div><div class="stat-val" id="totalReportsAll">0</div><div class="stat-label">Total Reports</div></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#fef9c3;">⭐</div><div><div class="stat-val" id="totalPointsAll">0</div><div class="stat-label">Points Awarded</div></div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#ffe4e6;">🏆</div><div><div class="stat-val" id="topReporter">—</div><div class="stat-label">Top Reporter</div></div></div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+
+      <!-- LEFT: Leaderboard -->
+      <div class="card" style="padding:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div class="card-title" style="margin-bottom:0;">🥇 Rankings</div>
+          <div class="filter-row" style="margin-bottom:0;">
+            <button class="filter-btn active" onclick="setFilter('points', this)">⭐ By Points</button>
+            <button class="filter-btn" onclick="setFilter('reports', this)">📋 By Reports</button>
+          </div>
+        </div>
+
+        <!-- Podium -->
+        <div class="podium" id="podium">
+          <div class="spinner"></div>
+        </div>
+
+        <!-- Full list -->
+        <div id="leaderboardList">
+          <div class="spinner"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+
+        <!-- Your Rank -->
+        <div class="your-rank-card">
+          <div style="font-size:0.8rem;opacity:0.85;margin-bottom:8px;">Your Current Rank</div>
+          <div class="your-rank-num" id="yourRankNum">#—</div>
+          <div class="your-rank-pts" id="yourRankPts">0 points</div>
+          <div style="margin-top:12px;background:rgba(255,255,255,0.15);border-radius:8px;padding:8px 12px;font-size:0.75rem;">
+            🚀 Keep reporting to climb the ranks!
+          </div>
+        </div>
+
+        <!-- Your Badges -->
+        <div class="card">
+          <div class="card-title">🎖️ Your Badges</div>
+          <div class="badge-mini-grid" id="yourBadges">
+            <div class="badge-mini earned"><div class="badge-mini-icon">🌟</div><div class="badge-mini-name">First Report</div></div>
+            <div class="badge-mini locked"><div class="badge-mini-icon">🔥</div><div class="badge-mini-name">On Fire</div></div>
+            <div class="badge-mini locked"><div class="badge-mini-icon">💎</div><div class="badge-mini-name">Diamond</div></div>
+            <div class="badge-mini locked"><div class="badge-mini-icon">🏙️</div><div class="badge-mini-name">City Hero</div></div>
+            <div class="badge-mini locked"><div class="badge-mini-icon">👑</div><div class="badge-mini-name">Legend</div></div>
+            <div class="badge-mini locked"><div class="badge-mini-icon">⚡</div><div class="badge-mini-name">Quick Fix</div></div>
+          </div>
+        </div>
+
+        <!-- Points Guide -->
+        <div class="card">
+          <div class="card-title">💡 How to Earn Points</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;padding:8px 12px;background:var(--bg);border-radius:8px;">
+              <span>📋 Submit a complaint</span><span style="font-weight:800;color:var(--accent);">+10 pts</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;padding:8px 12px;background:var(--bg);border-radius:8px;">
+              <span>👍 Get an upvote</span><span style="font-weight:800;color:var(--accent);">+5 pts</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;padding:8px 12px;background:var(--bg);border-radius:8px;">
+              <span>✅ Issue resolved</span><span style="font-weight:800;color:var(--accent);">+20 pts</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;padding:8px 12px;background:var(--bg);border-radius:8px;">
+              <span>📸 Add photo proof</span><span style="font-weight:800;color:var(--accent);">+5 pts</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD1c5N_XlIW8i3GHql5h1v7w44GLlfk-NU",
+    authDomain: "civicfix-17bd0.firebaseapp.com",
+    projectId: "civicfix-17bd0",
+    storageBucket: "civicfix-17bd0.firebasestorage.app",
+    messagingSenderId: "1084802379613",
+    appId: "1:1084802379613:web:4664d99dba1bf4b07d82b4",
+    measurementId: "G-Q0VY8NVGJZ"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let currentUser = null;
+  let allUsers = [];
+  let sortBy = 'points';
+
+  const avatarColors = ['#6c63ff','#ff6584','#43c6ac','#f7971e','#a78bfa','#0284c7','#16a34a','#f43f5e'];
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    currentUser = user;
+
+    // Set topbar avatar
+    const name = user.displayName || user.email;
+    const initials = name.substring(0, 2).toUpperCase();
+    const savedPic = localStorage.getItem('profilePic_' + user.uid);
+    if (savedPic) {
+      document.getElementById('avatarInitial').innerHTML = `<img src="${savedPic}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      document.getElementById('dropdownAvatar').innerHTML = `<img src="${savedPic}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    } else {
+      document.getElementById('avatarInitial').textContent = initials;
+      document.getElementById('dropdownAvatar').textContent = initials;
+    }
+    document.getElementById('dropdownName').textContent = name;
+    document.getElementById('dropdownEmail').textContent = user.email;
+
+    await loadLeaderboard();
+  });
+
+  async function loadLeaderboard() {
+    try {
+      const snap = await getDocs(collection(db, 'users'));
+      allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(u => u.totalReports > 0 || u.rewardPoints > 0);
+
+      // Update stats
+      document.getElementById('totalCitizens').textContent = snap.docs.length;
+      const totalRep = allUsers.reduce((s, u) => s + (u.totalReports || 0), 0);
+      const totalPts = allUsers.reduce((s, u) => s + (u.rewardPoints || 0), 0);
+      document.getElementById('totalReportsAll').textContent = totalRep;
+      document.getElementById('totalPointsAll').textContent = totalPts;
+
+      renderLeaderboard();
+    } catch(e) {
+      document.getElementById('leaderboardList').innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);font-size:0.82rem;">Could not load leaderboard.</div>`;
+    }
+  }
+
+  function renderLeaderboard() {
+    const sorted = [...allUsers].sort((a, b) =>
+      sortBy === 'points' ? (b.rewardPoints || 0) - (a.rewardPoints || 0) : (b.totalReports || 0) - (a.totalReports || 0)
+    );
+
+    const topVal = sorted[0] ? (sortBy === 'points' ? sorted[0].rewardPoints : sorted[0].totalReports) : 1;
+
+    // Top reporter name
+    if (sorted[0]) {
+      const top = sorted[0];
+      document.getElementById('topReporter').textContent = `${top.firstName || ''} ${top.lastName || ''}`.trim() || top.email?.split('@')[0] || '—';
+    }
+
+    // Your rank
+    const myRank = sorted.findIndex(u => u.id === currentUser.uid) + 1;
+    document.getElementById('yourRankNum').textContent = myRank > 0 ? `#${myRank}` : '#—';
+    const myData = sorted.find(u => u.id === currentUser.uid);
+    document.getElementById('yourRankPts').textContent = myData ? `${myData.rewardPoints || 0} points` : '0 points';
+
+    // Badges for current user
+    if (myData) {
+      updateBadges(myData);
+    }
+
+    // Render podium (top 3)
+    renderPodium(sorted.slice(0, 3));
+
+    // Render full list
+    const listEl = document.getElementById('leaderboardList');
+    if (sorted.length === 0) {
+      listEl.innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);font-size:0.82rem;">No citizens yet. Be the first to report! 🚀</div>`;
+      return;
+    }
+
+    listEl.innerHTML = sorted.map((u, i) => {
+      const name = `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email?.split('@')[0] || 'Anonymous';
+      const initials = name.substring(0, 2).toUpperCase();
+      const color = avatarColors[i % avatarColors.length];
+      const isMe = u.id === currentUser.uid;
+      const val = sortBy === 'points' ? (u.rewardPoints || 0) : (u.totalReports || 0);
+      const pct = Math.round((val / (topVal || 1)) * 100);
+      const rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
+      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i+1}`;
+      const savedPic = localStorage.getItem('profilePic_' + u.id);
+      const avatarHtml = savedPic
+        ? `<img src="${savedPic}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+        : initials;
+
+      return `
+        <div class="leaderboard-row ${isMe ? 'me' : ''}">
+          <div class="rank-num ${rankClass}">${medal}</div>
+          <div class="citizen-avatar" style="background:${color};">${avatarHtml}</div>
+          <div class="citizen-info">
+            <div class="citizen-name">
+              ${name}
+              ${isMe ? '<span class="me-tag">YOU</span>' : ''}
+              ${i === 0 ? '<span style="font-size:0.7rem;">👑</span>' : ''}
+            </div>
+            <div class="citizen-meta">${u.city || 'Unknown city'} • ${u.role || 'citizen'}</div>
+            <div class="progress-wrap">
+              <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;"></div></div>
+            </div>
+          </div>
+          <div class="citizen-stats">
+            <div class="citizen-reports">📋 ${u.totalReports || 0}</div>
+            <div class="citizen-points">⭐ ${u.rewardPoints || 0}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderPodium(top3) {
+    const podium = document.getElementById('podium');
+    if (top3.length === 0) { podium.innerHTML = ''; return; }
+
+    const order = [top3[1], top3[0], top3[2]].filter(Boolean); // 2nd, 1st, 3rd
+    const classes = ['second', 'first', 'third'];
+    const ranks = ['🥈', '🥇', '🥉'];
+
+    podium.innerHTML = order.map((u, i) => {
+      if (!u) return '';
+      const name = `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email?.split('@')[0] || 'Anonymous';
+      const initials = name.substring(0, 2).toUpperCase();
+      const color = avatarColors[i % avatarColors.length];
+      const savedPic = localStorage.getItem('profilePic_' + u.id);
+      const avatarHtml = savedPic
+        ? `<img src="${savedPic}">`
+        : initials;
+
+      return `
+        <div class="podium-item ${classes[i]}">
+          <div class="podium-rank">${ranks[i]}</div>
+          <div class="podium-avatar" style="background:${color};">${avatarHtml}</div>
+          <div class="podium-name">${name}</div>
+          <div class="podium-pts">⭐ ${u.rewardPoints || 0} pts</div>
+          <div class="podium-bar">${classes[i] === 'first' ? '1' : classes[i] === 'second' ? '2' : '3'}</div>
+        </div>`;
+    }).join('');
+  }
+
+  function updateBadges(data) {
+    const reports = data.totalReports || 0;
+    const points = data.rewardPoints || 0;
+    const badges = document.querySelectorAll('.badge-mini');
+    if (reports >= 1) { badges[0]?.classList.add('earned'); badges[0]?.classList.remove('locked'); }
+    if (reports >= 5) { badges[1]?.classList.add('earned'); badges[1]?.classList.remove('locked'); }
+    if (reports >= 50) { badges[2]?.classList.add('earned'); badges[2]?.classList.remove('locked'); }
+    if (reports >= 100) { badges[3]?.classList.add('earned'); badges[3]?.classList.remove('locked'); }
+    if (points >= 500) { badges[4]?.classList.add('earned'); badges[4]?.classList.remove('locked'); }
+  }
+
+  window.setFilter = function(type, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    sortBy = type;
+    renderLeaderboard();
+  }
+
+  window.toggleDropdown = function() {
+    const d = document.getElementById('profileDropdown');
+    d.style.display = d.style.display === 'none' ? 'block' : 'none';
+  }
+  window.logoutUser = function() {
+    if (confirm('Are you sure you want to logout?')) {
+      signOut(auth).then(() => window.location.href = 'login.html');
+    }
+  }
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#avatarInitial') && !e.target.closest('#profileDropdown')) {
+      const d = document.getElementById('profileDropdown');
+      if (d) d.style.display = 'none';
+    }
+  });
+</script>
+</body>
+</html>
